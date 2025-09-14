@@ -1,0 +1,118 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>26 Eduardo Medina - Foto</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin: 0;
+      padding: 20px;
+      background-image: url('https://img.pikbest.com/wp/202344/glitch-effect-background-texture-with-black_9927223.jpg!w700wp'); 
+      color: #f1eded;
+    }
+
+    .titulo {
+      background-color: #c98d0c; 
+      width: 100%;
+      color: white;
+      padding: 15px;
+      margin-bottom: 30px;
+      font-size: 20px;
+      border-radius: 8px;
+      font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+    }
+
+    video, canvas {
+      width: 100%;
+      max-width: 500px;
+      margin: 15px auto;
+      border: 2px solid #c98d0c;
+      border-radius: 5px;
+      display: block;
+    }
+
+    button {
+      padding: 15px 25px;
+      font-size: 20px;
+      background-color: #ceb10c; 
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      
+    }
+
+    button:hover {
+      background-color: #cf9a07; 
+      
+    }
+  </style>
+</head>
+<body>
+  <div class="titulo">
+    <h1>Debes decir "Foto" para capturar la imagen</h1>
+  </div>
+
+  <video id="video" autoplay playsinline></video>
+  <canvas id="canvas"></canvas>
+  <br>
+  <button id="descargar">Descargar la Foto</button>
+
+  <script>
+    const video = document.getElementById('video');
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    const btnDescargar = document.getElementById('descargar');
+
+    navigator.mediaDevices.getUserMedia({ video: true, audio: false })
+      .then((stream) => {
+        video.srcObject = stream;
+      })
+      .catch((err) => {
+        alert("No se pudo conectar a la cámara: " + err);
+      });
+
+    function tomarFoto() {
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    }
+
+    if ('webkitSpeechRecognition' in window ||'SpeechRecognition' in window) {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      const recognition = new SpeechRecognition();
+
+      recognition.lang = 'es-ES';
+      recognition.continuous = true;
+      recognition.interimResults = false;
+
+      recognition.onresult = (event) => {
+        const transcript = event.results[event.results.length - 1][0].transcript.trim().toLowerCase();
+        console.log("Escuchado:", transcript);
+        if (transcript.includes("foto")) {
+          tomarFoto();
+        }
+      };
+
+      recognition.onerror = (event) => {
+        console.error("Un Error en el reconocimiento de voz:", event.error);
+      };
+
+      recognition.start();
+    } else {
+      alert("El navegador no soporta la Web Speech API");
+    }
+
+    btnDescargar.addEventListener("click", () => {
+      const link = document.createElement('a');
+      link.download = 'foto.png';
+      link.href = canvas.toDataURL("image/png");
+      link.click();
+    });
+  </script>
+</body>
+</html>
